@@ -178,7 +178,7 @@ idePlugins recorder = pluginDescToIdePlugins allPlugins
       HaddockComments.descriptor pluginRecorder "haddockComments" :
 #endif
 #if hls_ecta
-      Ecta.descriptor pluginRecorder "ecta" :
+      Ecta.descriptor "ecta" :
 #endif
 #if hls_eval
       Eval.descriptor pluginRecorder "eval" :
