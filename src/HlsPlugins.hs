@@ -29,6 +29,10 @@ import qualified Ide.Plugin.Class                  as Class
 import qualified Ide.Plugin.HaddockComments        as HaddockComments
 #endif
 
+#if hls_ecta
+import qualified Ide.Plugin.Ecta                   as Ecta
+#endif
+
 #if hls_eval
 import qualified Ide.Plugin.Eval                   as Eval
 #endif
@@ -172,6 +176,9 @@ idePlugins recorder = pluginDescToIdePlugins allPlugins
 #endif
 #if hls_haddockComments
       HaddockComments.descriptor pluginRecorder "haddockComments" :
+#endif
+#if hls_ecta
+      Ecta.descriptor pluginRecorder "ecta" :
 #endif
 #if hls_eval
       Eval.descriptor pluginRecorder "eval" :
