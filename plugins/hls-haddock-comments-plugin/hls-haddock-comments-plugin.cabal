@@ -18,12 +18,11 @@ extra-source-files:
   test/testdata/*.hs
 
 library
-  if impl(ghc >= 9.2)
-    buildable: False
-  else
-    buildable: True
   exposed-modules:    Ide.Plugin.HaddockComments
-  hs-source-dirs:     src
+  if impl(ghc >= 9.2)
+    hs-source-dirs:     src-92
+  else
+    hs-source-dirs:     src
   ghc-options:
     -Wall -Wno-name-shadowing -Wredundant-constraints
     -Wno-unticked-promoted-constructors
@@ -32,7 +31,7 @@ library
     , base                  >=4.12 && <5
     , containers
     , ghc
-    , ghc-exactprint        < 1
+    , ghc-exactprint
     , ghcide                ^>=1.8
     , hls-plugin-api        ^>=1.5
     , hls-refactor-plugin
@@ -46,10 +45,6 @@ library
     TypeOperators
 
 test-suite tests
-  if impl(ghc >= 9.2)
-    buildable: False
-  else
-    buildable: True
   type:             exitcode-stdio-1.0
   default-language: Haskell2010
   hs-source-dirs:   test
