@@ -270,7 +270,7 @@ common splice
     cpp-options: -Dhls_splice
 
 common alternateNumberFormat
-  if flag(alternateNumberFormat) 
+  if flag(alternateNumberFormat)
     build-depends: hls-alternate-number-format-plugin ^>= 1.2
     cpp-options: -Dhls_alternateNumberFormat
 

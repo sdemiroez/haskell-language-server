@@ -5,21 +5,28 @@
 {-# LANGUAGE OverloadedStrings  #-}
 {-# LANGUAGE RecordWildCards    #-}
 {-# LANGUAGE TypeFamilies       #-}
+{-# LANGUAGE ViewPatterns       #-}
 module Ide.Plugin.Config
     ( getConfigFromNotification
     , Config(..)
+    , defConfig
     , parseConfig
     , PluginConfig(..)
     , CheckParents(..)
     ) where
 
 import           Control.Applicative
+import           Control.Lens        (preview)
 import           Data.Aeson          hiding (Error)
 import qualified Data.Aeson          as A
+import           Data.Aeson.Lens     (_String)
+import           Data.Aeson.Types    (explicitParseFieldMaybe)
 import qualified Data.Aeson.Types    as A
 import           Data.Default
 import qualified Data.Map            as Map
+import           Data.Maybe          (fromMaybe)
 import qualified Data.Text           as T
+import           GHC.Exts            (toList)
 import           GHC.Generics        (Generic)
 
 -- ---------------------------------------------------------------------
@@ -54,8 +61,9 @@ data Config =
     , plugins            :: !(Map.Map T.Text PluginConfig)
     } deriving (Show,Eq)
 
-instance Default Config where
-  def = Config
+-- | Default configuration values
+defConfig :: Map.Map T.Text PluginConfig -> Config
+defConfig defPlugins = Config
     { checkParents                = CheckOnSave
     , checkProject                = True
     -- , formattingProvider          = "brittany"
@@ -63,8 +71,11 @@ instance Default Config where
     -- , formattingProvider          = "floskell"
     -- , formattingProvider          = "stylish-haskell"
     , maxCompletions              = 40
-    , plugins                     = Map.empty
+    , plugins                     = defPlugins
     }
+
+instance Default Config where
+    def = defConfig mempty
 
 -- TODO: Add API for plugins to expose their own LSP config options
 parseConfig :: Config -> Value -> A.Parser Config
@@ -79,7 +90,18 @@ parseConfig defValue = A.withObject "Config" $ \v -> do
         <*> (o .:? "checkProject" <|> v .:? "checkProject") .!= checkProject defValue
         <*> o .:? "formattingProvider"                      .!= formattingProvider defValue
         <*> o .:? "maxCompletions"                          .!= maxCompletions defValue
-        <*> o .:? "plugin"                                  .!= plugins defValue
+        <*> explicitParseFieldMaybe (parsePlugins $ plugins defValue) o "plugin" .!= plugins defValue
+
+parsePlugins :: Map.Map T.Text PluginConfig -> Value -> A.Parser (Map.Map T.Text PluginConfig)
+parsePlugins defValue = A.withObject "Config.plugins" $ \o -> do
+  let -- parseOne :: Key -> Value -> A.Parser (T.Text, PluginConfig)
+      parseOne (preview _String . toJSON -> Just pId) pConfig = do
+        let defPluginConfig = fromMaybe def $ Map.lookup pId defValue
+        pConfig' <- parsePluginConfig defPluginConfig pConfig
+        return (pId, pConfig')
+      parseOne _ _ = fail "Expected plugin id to be a string"
+  plugins <- mapM (uncurry parseOne) (toList o)
+  return $ Map.fromList plugins
 
 instance A.ToJSON Config where
   toJSON Config{..} =
@@ -147,8 +169,8 @@ instance A.ToJSON PluginConfig where
                    , "config"           .= cfg
                    ]
 
-instance A.FromJSON PluginConfig where
-  parseJSON = A.withObject "PluginConfig" $ \o  -> PluginConfig
+parsePluginConfig :: PluginConfig -> Value -> A.Parser PluginConfig
+parsePluginConfig def= A.withObject "PluginConfig" $ \o  -> PluginConfig
       <$> o .:? "globalOn"         .!= plcGlobalOn def
       <*> o .:? "callHierarchyOn"  .!= plcCallHierarchyOn def
       <*> o .:? "codeActionsOn"    .!= plcCodeActionsOn def
