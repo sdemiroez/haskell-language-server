@@ -17,12 +17,19 @@ extra-source-files:
   LICENSE
   test/testdata/*.hs
 
+source-repository head
+    type:     git
+    location: https://github.com/haskell/haskell-language-server.git
+
 library
   exposed-modules:    Ide.Plugin.HaddockComments
   if impl(ghc >= 9.2)
     hs-source-dirs:     src-92
   else
     hs-source-dirs:     src
+    other-modules:
+      Ide.Plugin.HaddockComments.Data
+      Ide.Plugin.HaddockComments.Prelude
   ghc-options:
     -Wall -Wno-name-shadowing -Wredundant-constraints
     -Wno-unticked-promoted-constructors
@@ -38,6 +45,8 @@ library
     , lsp-types
     , text
     , unordered-containers
+    , transformers
+    , mtl
 
   default-language:   Haskell2010
   default-extensions:
