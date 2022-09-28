@@ -1037,19 +1037,21 @@ suggestExtendImport exportsMap (L _ HsModule {hsmodImports}) Diagnostic{_range=_
             ]
           | otherwise = []
         lookupExportMap binding mod
-          | Just match <- Map.lookup binding (getExportsMap exportsMap)
+          | let em = getExportsMap exportsMap
+                match1 = lookupOccEnv em (mkVarOrDataOcc binding)
+                match2 = lookupOccEnv em (mkTypeOcc binding)
+          , Just match <- match1 <> match2
           -- Only for the situation that data constructor name is same as type constructor name,
           -- let ident with parent be in front of the one without.
           , sortedMatch <- sortBy (\ident1 ident2 -> parent ident2 `compare` parent ident1) (Set.toList match)
           , idents <- filter (\ident -> moduleNameText ident == mod && (canUseDatacon || not (isDatacon ident))) sortedMatch
-          , (not . null) idents -- Ensure fallback while `idents` is empty
-          , ident <- head idents
+          , (ident:_) <- idents -- Ensure fallback while `idents` is empty
           = Just ident
 
             -- fallback to using GHC suggestion even though it is not always correct
           | otherwise
           = Just IdentInfo
-                { name = mkVarOccFS $ mkFastStringByteString $ T.encodeUtf8 binding
+                { name = mkVarOrDataOcc binding
                 , parent = Nothing
                 , identModuleName  = mkModuleNameFS $ mkFastStringByteString $ T.encodeUtf8 mod}
 #endif
@@ -1452,7 +1454,7 @@ suggestNewOrExtendImportForClassMethod packageExportsMap ps fileContents Diagnos
         "‘([^’]*)’ is not a \\(visible\\) method of class ‘([^’]*)’",
     idents <-
       maybe [] (Set.toList . Set.filter (\x -> fmap occNameText (parent x) == Just className)) $
-        Map.lookup methodName $ getExportsMap packageExportsMap =
+        lookupOccEnv (getExportsMap packageExportsMap) (mkVarOrDataOcc methodName) =
     mconcat $ suggest <$> idents
   | otherwise = []
   where
@@ -1507,7 +1509,7 @@ constructNewImportSuggestions
 constructNewImportSuggestions exportsMap (qual, thingMissing) notTheseModules = nubOrdOn snd
   [ suggestion
   | Just name <- [T.stripPrefix (maybe "" (<> ".") qual) $ notInScope thingMissing]
-  , identInfo <- maybe [] Set.toList $ Map.lookup name (getExportsMap exportsMap)
+  , identInfo <- maybe [] Set.toList $ (lookupOccEnv (getExportsMap exportsMap) (mkVarOrDataOcc name)) <> (lookupOccEnv (getExportsMap exportsMap) (mkTypeOcc name))
   , canUseIdent thingMissing identInfo
   , moduleNameText identInfo `notElem` fromMaybe [] notTheseModules
   , suggestion <- renderNewImport identInfo
