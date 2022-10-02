@@ -49,6 +49,7 @@ library
     , unordered-containers
     , transformers
     , mtl
+    , lens
 
   default-language:   Haskell2010
   default-extensions:
