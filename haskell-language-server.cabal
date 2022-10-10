@@ -210,7 +210,7 @@ common callHierarchy
     cpp-options: -Dhls_callHierarchy
 
 common haddockComments
-  if flag(haddockComments) && (impl(ghc < 9.2.1) || flag(ignore-plugins-ghc-bounds))
+  if flag(haddockComments)
     build-depends: hls-haddock-comments-plugin ^>= 1.1
     cpp-options: -Dhls_haddockComments
 
@@ -270,7 +270,7 @@ common splice
     cpp-options: -Dhls_splice
 
 common alternateNumberFormat
-  if flag(alternateNumberFormat) 
+  if flag(alternateNumberFormat)
     build-depends: hls-alternate-number-format-plugin ^>= 1.2
     cpp-options: -Dhls_alternateNumberFormat
 

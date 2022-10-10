@@ -19,11 +19,15 @@ import           Development.IDE.GHC.Compat.ExactPrint
 import           Development.IDE.GHC.ExactPrint        (GetAnnotatedParsedSource (..))
 import qualified Development.IDE.GHC.ExactPrint        as ExactPrint
 import           Development.IDE.Plugin.CodeAction     (mkExactprintPluginDescriptor)
+import qualified Ide.Plugin.HaddockComments.Data       as Data
 import           Ide.Types
 import           Language.LSP.Types
 import           Language.LSP.Types.Lens               (HasChanges (changes))
 
 data Log = LogExactPrint ExactPrint.Log
+
+instance Pretty Log where
+    pretty (LogExactPrint log) = pretty log
 
 descriptor :: Recorder (WithPriority Log) -> PluginId -> PluginDescriptor IdeState
 descriptor recorder plId = mkExactprintPluginDescriptor (cmapWithPrio LogExactPrint recorder) $
@@ -52,7 +56,7 @@ codeActionProvider ideState _pId (CodeActionParams _ _ (TextDocumentIdentifier u
 
 declHaddockGenerator :: [LHsDecl GhcPs -> Maybe (LHsDecl GhcPs)]
 declHaddockGenerator =
-    [
+    [ Data.generateHaddockComments
     ]
 
 declInterleaveWithRange :: LHsDecl GhcPs -> Range -> Bool
