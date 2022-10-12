@@ -64,6 +64,7 @@ test-suite tests
     , containers
     , filepath
     , hls-plugin-api
+    , hls-refactor-plugin
     , hls-retrie-plugin
     , hls-test-utils             ^>=1.4
     , text
