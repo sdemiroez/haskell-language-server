@@ -3680,7 +3680,7 @@ run' :: (FilePath -> Session a) -> IO a
 run' s = withTempDir $ \dir -> runInDir dir (s dir)
 
 runInDir :: FilePath -> Session a -> IO a
-runInDir dir = runSessionWithServer' refactorPlugin def def lspTestCaps dir
+runInDir dir = runSessionWithServer' (IdePlugins refactorPlugin) def def lspTestCaps dir
 
 lspTestCaps :: ClientCapabilities
 lspTestCaps = fullCaps { _window = Just $ WindowClientCapabilities (Just True) Nothing Nothing }

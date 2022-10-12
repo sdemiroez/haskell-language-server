@@ -4,6 +4,7 @@ module Main where
 
 import qualified Data.Text                 as T
 import           Ide.Plugin.ExplicitFixity (descriptor)
+import           Ide.Types                 (IdePlugins (IdePlugins))
 import           System.FilePath
 import           Test.Hls
 
@@ -51,7 +52,7 @@ hoverTestImport :: TestName -> Position -> T.Text -> TestTree
 hoverTestImport = hoverTest' "HoverImport.hs"
 
 hoverTest' :: String -> TestName -> Position -> T.Text -> TestTree
-hoverTest' docName title pos expected = testCase title $ runSessionWithServer plugin testDataDir $ do
+hoverTest' docName title pos expected = testCase title $ runSessionWithServer (IdePlugins [plugin]) testDataDir $ do
     doc <- openDoc docName "haskell"
     waitForKickDone
     h <- getHover doc pos

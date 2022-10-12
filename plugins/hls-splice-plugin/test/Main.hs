@@ -63,7 +63,7 @@ tests = testGroup "splice"
 
 goldenTest :: FilePath -> ExpandStyle -> Int -> Int -> TestTree
 goldenTest fp tc line col =
-  goldenWithHaskellDoc splicePlugin (fp <> " (golden)") testDataDir fp "expected" "hs" $ \doc -> do
+  goldenWithHaskellDoc (IdePlugins splicePlugin) (fp <> " (golden)") testDataDir fp "expected" "hs" $ \doc -> do
     -- wait for the entire build to finish, so that code actions that
     -- use stale data will get uptodate stuff
     void waitForBuildQueue
@@ -76,7 +76,7 @@ goldenTest fp tc line col =
 
 goldenTestWithEdit :: FilePath -> ExpandStyle -> Int -> Int -> TestTree
 goldenTestWithEdit fp tc line col =
-  goldenWithHaskellDoc splicePlugin (fp <> " (golden)") testDataDir fp "expected" "hs" $ \doc -> do
+  goldenWithHaskellDoc (IdePlugins splicePlugin) (fp <> " (golden)") testDataDir fp "expected" "hs" $ \doc -> do
      orig <- documentContents doc
      let
        lns = T.lines orig

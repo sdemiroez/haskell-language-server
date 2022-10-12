@@ -12,6 +12,7 @@ import           Data.Foldable            (find, forM_)
 import           Data.Text                (Text)
 import qualified Data.Text                as T
 import qualified Ide.Plugin.RefineImports as RefineImports
+import           Ide.Types                (IdePlugins (IdePlugins))
 import           System.FilePath          ((<.>), (</>))
 import           Test.Hls
 
@@ -67,7 +68,7 @@ executeCmd cmd = do
 -- helpers
 
 goldenWithRefineImports :: FilePath -> (TextDocumentIdentifier -> Session ()) -> TestTree
-goldenWithRefineImports fp = goldenWithHaskellDoc refineImportsPlugin (fp <> " (golden)") testDataDir fp "expected" "hs"
+goldenWithRefineImports fp = goldenWithHaskellDoc (IdePlugins [refineImportsPlugin]) (fp <> " (golden)") testDataDir fp "expected" "hs"
 
 testDataDir :: String
 testDataDir = "test" </> "testdata"

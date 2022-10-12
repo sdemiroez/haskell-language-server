@@ -43,4 +43,4 @@ stanPlugin = Stan.descriptor mempty "stan"
 
 runStanSession :: FilePath -> Session a -> IO a
 runStanSession subdir =
-  failIfSessionTimeout . runSessionWithServer stanPlugin (testDir </> subdir)
+  failIfSessionTimeout . runSessionWithServer (IdePlugins stanPlugin) (testDir </> subdir)

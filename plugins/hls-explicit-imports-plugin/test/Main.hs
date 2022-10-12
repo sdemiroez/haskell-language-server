@@ -12,6 +12,7 @@ import           Data.Foldable              (find, forM_)
 import           Data.Text                  (Text)
 import qualified Data.Text                  as T
 import qualified Ide.Plugin.ExplicitImports as ExplicitImports
+import           Ide.Types                  (IdePlugins (IdePlugins))
 import           System.FilePath            ((<.>), (</>))
 import           Test.Hls
 
@@ -28,12 +29,12 @@ main = defaultTestRunner $
     [ codeActionGoldenTest "UsualCase" 3 0
     , codeLensGoldenTest "UsualCase" 0
     , testCase "No CodeAction when exported" $
-      runSessionWithServer explicitImportsPlugin testDataDir $ do
+      runSessionWithServer (IdePlugins [explicitImportsPlugin]) testDataDir $ do
         doc <- openDoc "Exported.hs" "haskell"
         action <- getCodeActions doc (pointRange 3 0)
         liftIO $ action @?= []
     , testCase "No CodeLens when exported" $
-      runSessionWithServer explicitImportsPlugin testDataDir $ do
+      runSessionWithServer (IdePlugins [explicitImportsPlugin]) testDataDir $ do
         doc <- openDoc "Exported.hs" "haskell"
         lenses <- getCodeLenses doc
         liftIO $ lenses @?= []
@@ -102,7 +103,7 @@ executeCmd cmd = do
 -- helpers
 
 goldenWithExplicitImports :: FilePath -> (TextDocumentIdentifier -> Session ()) -> TestTree
-goldenWithExplicitImports fp = goldenWithHaskellDoc explicitImportsPlugin (fp <> " (golden)") testDataDir fp "expected" "hs"
+goldenWithExplicitImports fp = goldenWithHaskellDoc (IdePlugins [explicitImportsPlugin]) (fp <> " (golden)") testDataDir fp "expected" "hs"
 
 testDataDir :: String
 testDataDir = "test" </> "testdata"

@@ -19,6 +19,7 @@ import           Development.IDE.Types.Logger
 import qualified Ide.Plugin.Class             as Class
 import           Ide.Plugin.Config            (PluginConfig (plcConfig))
 import qualified Ide.Plugin.Config            as Plugin
+import           Ide.Types                    (IdePlugins (IdePlugins))
 import qualified Language.LSP.Types.Lens      as J
 import           System.FilePath
 import           Test.Hls
@@ -40,7 +41,7 @@ codeActionTests :: Recorder (WithPriority Class.Log) -> TestTree
 codeActionTests recorder = testGroup
   "code actions"
   [ testCase "Produces addMinimalMethodPlaceholders code actions for one instance" $ do
-      runSessionWithServer (classPlugin recorder) testDataDir $ do
+      runSessionWithServer (IdePlugins [classPlugin recorder]) testDataDir $ do
         doc <- openDoc "T1.hs" "haskell"
         _ <- waitForDiagnosticsFromSource doc "typecheck"
         caResults <- getAllCodeActions doc
@@ -84,7 +85,7 @@ codeLensTests :: Recorder (WithPriority Class.Log) -> TestTree
 codeLensTests recorder = testGroup
     "code lens"
     [ testCase "Has code lens" $ do
-        runSessionWithServer (classPlugin recorder) testDataDir $ do
+        runSessionWithServer (IdePlugins [classPlugin recorder]) testDataDir $ do
             doc <- openDoc "CodeLensSimple.hs" "haskell"
             lens <- getCodeLenses doc
             let titles = map (^. J.title) $ mapMaybe (^. J.command) lens
@@ -110,14 +111,14 @@ _CACodeAction = prism' InR $ \case
 
 goldenCodeLens :: Recorder (WithPriority Class.Log) -> TestName -> FilePath -> Int -> TestTree
 goldenCodeLens recorder title path idx =
-    goldenWithHaskellDoc (classPlugin recorder) title testDataDir path "expected" "hs" $ \doc -> do
+    goldenWithHaskellDoc (IdePlugins [classPlugin recorder]) title testDataDir path "expected" "hs" $ \doc -> do
         lens <- getCodeLenses doc
         executeCommand $ fromJust $ (lens !! idx) ^. J.command
         void $ skipManyTill anyMessage (message SWorkspaceApplyEdit)
 
 goldenWithClass :: Recorder (WithPriority Class.Log) -> TestName -> FilePath -> FilePath -> ([CodeAction] -> Session ()) -> TestTree
 goldenWithClass recorder title path desc act =
-  goldenWithHaskellDoc (classPlugin recorder) title testDataDir path (desc <.> "expected") "hs" $ \doc -> do
+  goldenWithHaskellDoc (IdePlugins [classPlugin recorder]) title testDataDir path (desc <.> "expected") "hs" $ \doc -> do
     _ <- waitForDiagnosticsFromSource doc "typecheck"
     actions <- concatMap (^.. _CACodeAction) <$> getAllCodeActions doc
     act actions

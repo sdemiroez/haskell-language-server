@@ -57,6 +57,7 @@ test-suite tests
     , base                 >=4.12 && < 5
     , filepath
     , hls-change-type-signature-plugin
+    , hls-plugin-api
     , hls-test-utils       ^>=1.4
     , lsp
     , QuickCheck

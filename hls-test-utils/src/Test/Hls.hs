@@ -111,7 +111,7 @@ goldenGitDiff :: TestName -> FilePath -> IO ByteString -> TestTree
 goldenGitDiff name = goldenVsStringDiff name gitDiff
 
 goldenWithHaskellDoc
-  :: PluginDescriptor IdeState
+  :: IdePlugins IdeState
   -> TestName
   -> FilePath
   -> FilePath
@@ -130,7 +130,7 @@ goldenWithHaskellDoc plugin title testDataDir path desc ext act =
     documentContents doc
 
 goldenWithHaskellDocFormatter
-  :: PluginDescriptor IdeState
+  :: IdePlugins IdeState
   -> String
   -> PluginConfig
   -> TestName
@@ -150,13 +150,13 @@ goldenWithHaskellDocFormatter plugin formatter conf title testDataDir path desc 
     act doc
     documentContents doc
 
-runSessionWithServer :: PluginDescriptor IdeState -> FilePath -> Session a -> IO a
-runSessionWithServer plugin = runSessionWithServer' [plugin] (defConfigForPlugins $ IdePlugins [plugin]) def fullCaps
+runSessionWithServer :: IdePlugins IdeState -> FilePath -> Session a -> IO a
+runSessionWithServer plugin = runSessionWithServer' plugin (defConfigForPlugins plugin) def fullCaps
 
-runSessionWithServerFormatter :: PluginDescriptor IdeState -> String -> PluginConfig -> FilePath -> Session a -> IO a
+runSessionWithServerFormatter :: IdePlugins IdeState -> String -> PluginConfig -> FilePath -> Session a -> IO a
 runSessionWithServerFormatter plugin formatter conf =
   runSessionWithServer'
-    [plugin]
+    plugin
     (defConfig mempty)
       { formattingProvider = T.pack formatter
       , plugins = M.singleton (T.pack formatter) conf
@@ -178,7 +178,7 @@ lock = unsafePerformIO newLock
 -- Note: cwd will be shifted into @root@ in @Session a@
 runSessionWithServer' ::
   -- | plugins to load on the server
-  [PluginDescriptor IdeState] ->
+  IdePlugins IdeState ->
   -- | lsp config for the server
   Config ->
   -- | config for the test session
@@ -205,7 +205,7 @@ runSessionWithServer' plugins conf sconf caps root s = withLock lock $ keepCurre
 
         recorder = cmapWithPrio pretty docWithFilteredPriorityRecorder
 
-        hlsPlugins = IdePlugins $ Test.blockCommandDescriptor "block-command" : plugins
+        hlsPlugins = IdePlugins [Test.blockCommandDescriptor "block-command"] <> plugins
 
         arguments@Arguments{ argsIdeOptions, argsLogger } =
             testing (cmapWithPrio LogIDEMain recorder) logger hlsPlugins

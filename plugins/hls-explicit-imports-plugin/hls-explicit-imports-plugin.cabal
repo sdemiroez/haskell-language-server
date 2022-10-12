@@ -48,5 +48,6 @@ test-suite tests
     , base
     , filepath
     , hls-explicit-imports-plugin
+    , hls-plugin-api
     , hls-test-utils
     , text

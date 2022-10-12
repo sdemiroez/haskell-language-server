@@ -39,7 +39,7 @@ main = do
 
 makeSelectionRangeGoldenTest :: Recorder (WithPriority Log) -> TestName -> [(UInt, UInt)] -> TestTree
 makeSelectionRangeGoldenTest recorder testName positions = goldenGitDiff testName (testDataDir </> testName <.> "golden" <.> "txt") $ do
-    res <- runSessionWithServer (plugin recorder) testDataDir $ do
+    res <- runSessionWithServer (IdePlugins (plugin recorder)) testDataDir $ do
         doc <- openDoc (testName <.> "hs") "haskell"
         resp <- request STextDocumentSelectionRange $ SelectionRangeParams Nothing Nothing doc
             (List $ fmap (uncurry Position . (\(x, y) -> (x-1, y-1))) positions)
@@ -68,7 +68,7 @@ makeSelectionRangeGoldenTest recorder testName positions = goldenGitDiff testNam
 
 foldingRangeGoldenTest :: Recorder (WithPriority Log) -> TestName -> TestTree
 foldingRangeGoldenTest recorder testName = goldenGitDiff  testName (testDataDir </> testName <.> "golden" <.> "txt") $ do
-    res <- runSessionWithServer (plugin recorder) testDataDir $ do
+    res <- runSessionWithServer (IdePlugins (plugin recorder)) testDataDir $ do
         doc <- openDoc (testName <.> "hs") "haskell"
         resp <- request STextDocumentFoldingRange $ FoldingRangeParams Nothing Nothing doc
         let res = resp ^. result

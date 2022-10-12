@@ -38,7 +38,7 @@ tests =
       executeCommand c
       void $ skipManyTill anyMessage (message SWorkspaceApplyEdit)
   , testCase "Should not show code lens if the module name is correct" $
-      runSessionWithServer moduleNamePlugin testDataDir $ do
+      runSessionWithServer (IdePlugins moduleNamePlugin) testDataDir $ do
         doc <- openDoc "CorrectName.hs" "haskell"
         lenses <- getCodeLenses doc
         liftIO $ lenses @?= []
@@ -51,7 +51,7 @@ tests =
   ]
 
 goldenWithModuleName :: TestName -> FilePath -> (TextDocumentIdentifier -> Session ()) -> TestTree
-goldenWithModuleName title path = goldenWithHaskellDoc moduleNamePlugin title testDataDir path "expected" "hs"
+goldenWithModuleName title path = goldenWithHaskellDoc (IdePlugins moduleNamePlugin) title testDataDir path "expected" "hs"
 
 testDataDir :: FilePath
 testDataDir = "test" </> "testdata"

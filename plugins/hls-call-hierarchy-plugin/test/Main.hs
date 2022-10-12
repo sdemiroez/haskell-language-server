@@ -13,6 +13,7 @@ import           Data.List                (sort)
 import qualified Data.Map                 as M
 import qualified Data.Text                as T
 import           Ide.Plugin.CallHierarchy
+import           Ide.Types                (IdePlugins (IdePlugins))
 import qualified Language.LSP.Test        as Test
 import qualified Language.LSP.Types.Lens  as L
 import           System.Directory.Extra
@@ -196,7 +197,7 @@ incomingCallsTests =
   [ testGroup "single file"
     [
       testCase "xdata unavailable" $
-        runSessionWithServer plugin testDataDir $ do
+        runSessionWithServer (IdePlugins [plugin]) testDataDir $ do
           doc <- createDoc "A.hs" "haskell" $ T.unlines ["a=3", "b=a"]
           waitForKickDone
           [item] <- Test.prepareCallHierarchy (mkPrepareCallHierarchyParam doc 1 0)
@@ -321,7 +322,7 @@ outgoingCallsTests =
   [ testGroup "single file"
     [
       testCase "xdata unavailable" $ withCanonicalTempDir $ \dir ->
-        runSessionWithServer plugin dir $ do
+        runSessionWithServer (IdePlugins [plugin]) dir $ do
           doc <- createDoc "A.hs" "haskell" $ T.unlines ["a=3", "b=a"]
           waitForKickDone
           [item] <- Test.prepareCallHierarchy (mkPrepareCallHierarchyParam doc 0 1)
@@ -425,7 +426,7 @@ deriving instance Ord CallHierarchyOutgoingCall
 
 incomingCallTestCase :: T.Text -> Int -> Int -> [(Int, Int)] -> [Range] -> Assertion
 incomingCallTestCase contents queryX queryY positions ranges = withCanonicalTempDir $ \dir ->
-  runSessionWithServer plugin dir $ do
+  runSessionWithServer (IdePlugins [plugin]) dir $ do
     doc <- createDoc "A.hs" "haskell" contents
     waitForKickDone
     items <- concatMapM (\((x, y), range) ->
@@ -445,7 +446,7 @@ incomingCallTestCase contents queryX queryY positions ranges = withCanonicalTemp
 
 incomingCallMultiFileTestCase :: FilePath -> Int -> Int -> M.Map FilePath [((Int, Int), Range)] -> Assertion
 incomingCallMultiFileTestCase filepath queryX queryY mp =
-  runSessionWithServer plugin testDataDir $ do
+  runSessionWithServer (IdePlugins [plugin]) testDataDir $ do
     doc <- openDoc filepath "haskell"
     waitForKickDone
     items <- fmap concat $ sequence $ M.elems $ M.mapWithKey (\fp pr -> do
@@ -467,7 +468,7 @@ incomingCallMultiFileTestCase filepath queryX queryY mp =
 
 outgoingCallTestCase :: T.Text -> Int -> Int -> [(Int, Int)] -> [Range] -> Assertion
 outgoingCallTestCase contents queryX queryY positions ranges = withCanonicalTempDir $ \dir ->
-  runSessionWithServer plugin dir $ do
+  runSessionWithServer (IdePlugins [plugin]) dir $ do
     doc <- createDoc "A.hs" "haskell" contents
     waitForKickDone
     items <- concatMapM (\((x, y), range) ->
@@ -486,7 +487,7 @@ outgoingCallTestCase contents queryX queryY positions ranges = withCanonicalTemp
 
 outgoingCallMultiFileTestCase :: FilePath -> Int -> Int -> M.Map FilePath [((Int, Int), Range)] -> Assertion
 outgoingCallMultiFileTestCase filepath queryX queryY mp =
-  runSessionWithServer plugin testDataDir $ do
+  runSessionWithServer (IdePlugins [plugin]) testDataDir $ do
     doc <- openDoc filepath "haskell"
     waitForKickDone
     items <- fmap concat $ sequence $ M.elems $ M.mapWithKey (\fp pr -> do
@@ -507,7 +508,7 @@ outgoingCallMultiFileTestCase filepath queryX queryY mp =
 
 oneCaseWithCreate :: T.Text -> Int -> Int -> (Uri -> CallHierarchyItem) -> Assertion
 oneCaseWithCreate contents queryX queryY expected = withCanonicalTempDir $ \dir ->
-  runSessionWithServer plugin dir $ do
+  runSessionWithServer (IdePlugins [plugin]) dir $ do
     doc <- createDoc "A.hs" "haskell" contents
     waitForKickDone
     Test.prepareCallHierarchy (mkPrepareCallHierarchyParam doc queryX queryY) >>=

@@ -136,7 +136,7 @@ completionSnippetTests =
 
 completionTest :: String -> String -> T.Text -> T.Text -> Maybe InsertTextFormat -> Maybe T.Text -> Maybe T.Text -> [UInt] -> TestTree
 completionTest testComment fileName te' label textFormat insertText detail [a, b, c, d, x, y] =
-  testCase testComment $ runSessionWithServer pragmasPlugin testDataDir $ do
+  testCase testComment $ runSessionWithServer (IdePlugins pragmasPlugin) testDataDir $ do
     doc <- openDoc fileName "haskell"
     _ <- waitForDiagnostics
     let te = TextEdit (Range (Position a b) (Position c d)) te'
@@ -151,7 +151,7 @@ completionTest testComment fileName te' label textFormat insertText detail [a, b
       item ^. L.detail @?= detail
 
 goldenWithPragmas :: TestName -> FilePath -> (TextDocumentIdentifier -> Session ()) -> TestTree
-goldenWithPragmas title path = goldenWithHaskellDoc pragmasPlugin title testDataDir path "expected" "hs"
+goldenWithPragmas title path = goldenWithHaskellDoc (IdePlugins pragmasPlugin) title testDataDir path "expected" "hs"
 
 testDataDir :: FilePath
 testDataDir = "test" </> "testdata"

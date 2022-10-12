@@ -9,6 +9,7 @@ import           Data.Text                        (Text)
 import qualified Data.Text                        as T
 import qualified Ide.Plugin.AlternateNumberFormat as AlternateNumberFormat
 import qualified Ide.Plugin.Conversion            as Conversion
+import           Ide.Types                        (IdePlugins (IdePlugins))
 import           Language.LSP.Types               (toEither)
 import           Language.LSP.Types.Lens          (kind)
 import           Properties.Conversion            (conversions)
@@ -54,7 +55,7 @@ test = testGroup "alternateNumberFormat" [
 
 codeActionProperties :: TestName -> [(Int, Int)] -> ([CodeAction] -> Session ()) -> TestTree
 codeActionProperties fp locs assertions = testCase fp $ do
-    runSessionWithServer alternateNumberFormatPlugin testDataDir $ do
+    runSessionWithServer (IdePlugins [alternateNumberFormatPlugin]) testDataDir $ do
         openDoc (fp <.> ".hs") "haskell" >>= codeActionsFromLocs >>= findAlternateNumberActions >>= assertions
     where
         -- similar to codeActionTest
@@ -75,7 +76,7 @@ testDataDir :: FilePath
 testDataDir = "test" </> "testdata"
 
 goldenAlternateFormat :: FilePath -> (TextDocumentIdentifier -> Session ()) -> TestTree
-goldenAlternateFormat fp = goldenWithHaskellDoc alternateNumberFormatPlugin (fp <> " (golden)") testDataDir fp "expected" "hs"
+goldenAlternateFormat fp = goldenWithHaskellDoc (IdePlugins [alternateNumberFormatPlugin]) (fp <> " (golden)") testDataDir fp "expected" "hs"
 
 codeActionTest :: (Maybe Text -> Bool) -> FilePath -> Int -> Int -> TestTree
 codeActionTest filter' fp line col = goldenAlternateFormat fp $ \doc -> do

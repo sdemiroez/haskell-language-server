@@ -48,6 +48,7 @@ test-suite tests
   build-depends:
     , base
     , filepath
+    , hls-plugin-api
     , hls-refine-imports-plugin
     , hls-test-utils
     , text

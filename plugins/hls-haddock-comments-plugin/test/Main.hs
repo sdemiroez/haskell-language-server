@@ -12,6 +12,7 @@ import           Data.Foldable              (find)
 import           Data.Maybe                 (mapMaybe)
 import           Data.Text                  (Text)
 import qualified Ide.Plugin.HaddockComments as HaddockComments
+import           Ide.Types                  (IdePlugins (IdePlugins))
 import           System.FilePath            ((<.>), (</>))
 import           Test.Hls
 
@@ -37,7 +38,7 @@ tests =
 
 goldenWithHaddockComments :: FilePath -> GenCommentsType -> UInt -> UInt -> TestTree
 goldenWithHaddockComments fp (toTitle -> expectedTitle) l c =
-  goldenWithHaskellDoc haddockCommentsPlugin (fp <> " (golden)") testDataDir fp "expected" "hs" $ \doc -> do
+  goldenWithHaskellDoc (IdePlugins [haddockCommentsPlugin]) (fp <> " (golden)") testDataDir fp "expected" "hs" $ \doc -> do
     actions <- getCodeActions doc (Range (Position l c) (Position l $ succ c))
     case find ((== Just expectedTitle) . caTitle) actions of
       Just (InR x) -> executeCodeAction x
@@ -45,7 +46,7 @@ goldenWithHaddockComments fp (toTitle -> expectedTitle) l c =
 
 expectedNothing :: FilePath -> GenCommentsType -> UInt -> UInt -> TestTree
 expectedNothing fp (toTitle -> expectedTitle) l c = testCase fp $
-  runSessionWithServer haddockCommentsPlugin testDataDir $ do
+  runSessionWithServer (IdePlugins [haddockCommentsPlugin]) testDataDir $ do
     doc <- openDoc (fp <.> "hs") "haskell"
     titles <- mapMaybe caTitle <$> getCodeActions doc (Range (Position l c) (Position l $ succ c))
     liftIO $ expectedTitle `notElem` titles @? "Unexpected CodeAction"

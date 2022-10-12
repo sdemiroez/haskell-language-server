@@ -17,6 +17,7 @@ import qualified Data.Text               as T
 import           Ide.Plugin.Config       (Config (..), PluginConfig (..))
 import qualified Ide.Plugin.Config       as Plugin
 import qualified Ide.Plugin.Hlint        as HLint
+import           Ide.Types               (IdePlugins (IdePlugins))
 import qualified Language.LSP.Types.Lens as L
 import           System.FilePath         ((</>))
 import           Test.Hls
@@ -101,7 +102,7 @@ suggestionsTests =
         contents <- skipManyTill anyMessage $ getDocumentEdit doc
         liftIO $ contents @?= "main = undefined\nfoo x = x\n"
 
-    , testCase "falls back to pre 3.8 code actions" $ runSessionWithServer' [hlintPlugin] def def noLiteralCaps "test/testdata" $ do
+    , testCase "falls back to pre 3.8 code actions" $ runSessionWithServer' (IdePlugins [hlintPlugin]) def def noLiteralCaps "test/testdata" $ do
         doc <- openDoc "Base.hs" "haskell"
 
         _ <- waitForDiagnosticsFromSource doc "hlint"
@@ -330,7 +331,7 @@ testDir = "test/testdata"
 
 runHlintSession :: FilePath -> Session a -> IO a
 runHlintSession subdir  =
-    failIfSessionTimeout . runSessionWithServer hlintPlugin (testDir </> subdir)
+    failIfSessionTimeout . runSessionWithServer (IdePlugins [hlintPlugin]) (testDir </> subdir)
 
 noHlintDiagnostics :: [Diagnostic] -> Assertion
 noHlintDiagnostics diags =
@@ -424,5 +425,5 @@ goldenTest testCaseName goldenFilename point hintText =
 
 setupGoldenHlintTest :: TestName -> FilePath -> (TextDocumentIdentifier -> Session ()) -> TestTree
 setupGoldenHlintTest testName path =
-  goldenWithHaskellDoc hlintPlugin testName testDir path "expected" "hs"
+  goldenWithHaskellDoc (IdePlugins [hlintPlugin]) testName testDir path "expected" "hs"
 

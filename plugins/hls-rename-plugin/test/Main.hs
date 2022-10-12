@@ -6,6 +6,7 @@ import           Data.Aeson
 import qualified Data.Map          as M
 import           Ide.Plugin.Config
 import qualified Ide.Plugin.Rename as Rename
+import           Ide.Types         (IdePlugins (IdePlugins))
 import           System.FilePath
 import           Test.Hls
 
@@ -68,7 +69,7 @@ tests = testGroup "Rename"
 
 goldenWithRename :: TestName-> FilePath -> (TextDocumentIdentifier -> Session ()) -> TestTree
 goldenWithRename title path act =
-    goldenWithHaskellDoc renamePlugin title testDataDir path "expected" "hs" $ \doc -> do
+    goldenWithHaskellDoc (IdePlugins [renamePlugin]) title testDataDir path "expected" "hs" $ \doc -> do
         sendConfigurationChanged $ toJSON $
             def { plugins = M.fromList [("rename", def { plcConfig = "crossModule" .= True })] }
         act doc

@@ -55,6 +55,7 @@ test-suite tests
     , extra
     , filepath
     , hls-call-hierarchy-plugin
+    , hls-plugin-api
     , hls-test-utils              ^>=1.4
     , lens
     , lsp

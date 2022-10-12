@@ -50,5 +50,6 @@ test-suite tests
     , base
     , filepath
     , hls-explicit-fixity-plugin
+    , hls-plugin-api
     , hls-test-utils              ^>=1.4
     , text

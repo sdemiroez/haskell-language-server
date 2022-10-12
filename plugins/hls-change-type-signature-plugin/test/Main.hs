@@ -7,6 +7,7 @@ import qualified Data.Text                      as T
 import qualified Data.Text.IO                   as TIO
 import           Ide.Plugin.ChangeTypeSignature (errorMessageRegexes)
 import qualified Ide.Plugin.ChangeTypeSignature as ChangeTypeSignature
+import           Ide.Types                      (IdePlugins (IdePlugins))
 import           System.FilePath                ((<.>), (</>))
 import           Test.Hls                       (CodeAction (..), Command,
                                                  GhcVersion (..), IdeState,
@@ -89,7 +90,7 @@ testDataDir :: FilePath
 testDataDir = "test" </> "testdata"
 
 goldenChangeSignature :: FilePath -> (TextDocumentIdentifier -> Session ()) -> TestTree
-goldenChangeSignature fp = goldenWithHaskellDoc changeTypeSignaturePlugin (fp <> " (golden)") testDataDir fp "expected" "hs"
+goldenChangeSignature fp = goldenWithHaskellDoc (IdePlugins [changeTypeSignaturePlugin]) (fp <> " (golden)") testDataDir fp "expected" "hs"
 
 codeActionTest :: FilePath -> Int -> Int -> TestTree
 codeActionTest fp line col = goldenChangeSignature fp $ \doc -> do
@@ -102,7 +103,7 @@ codeActionTest fp line col = goldenChangeSignature fp $ \doc -> do
 
 codeActionProperties :: TestName -> [(Int, Int)] -> ([CodeAction] -> Session ()) -> TestTree
 codeActionProperties fp locs assertions = testCase fp $ do
-    runSessionWithServer changeTypeSignaturePlugin testDataDir $ do
+    runSessionWithServer (IdePlugins [changeTypeSignaturePlugin]) testDataDir $ do
         openDoc (fp <.> ".hs") "haskell" >>= codeActionsFromLocs >>= findChangeTypeActions >>= assertions
     where
         codeActionsFromLocs doc = concat <$> mapM (getCodeActions doc . uncurry pointRange) locs
