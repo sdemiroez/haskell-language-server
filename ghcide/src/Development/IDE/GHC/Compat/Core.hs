@@ -451,12 +451,14 @@ module Development.IDE.GHC.Compat.Core (
     -- * Syntax re-exports
 #if MIN_VERSION_ghc(9,0,0)
     module GHC.Hs,
+    module GHC.Hs.Binds,
     module GHC.Parser,
     module GHC.Parser.Header,
     module GHC.Parser.Lexer,
 #else
 #if MIN_VERSION_ghc(8,10,0)
     module GHC.Hs,
+    module GHC.Hs.Binds,
 #else
     module HsBinds,
     module HsDecls,
@@ -817,6 +819,10 @@ import qualified GHC.Driver.Finder as GHC
 import qualified Finder as GHC
 #endif
 
+
+#if MIN_VERSION_ghc(8,10,0)
+import           GHC.Hs.Binds
+#endif
 
 mkHomeModLocation :: DynFlags -> ModuleName -> FilePath -> IO Module.ModLocation
 #if MIN_VERSION_ghc(9,3,0)
