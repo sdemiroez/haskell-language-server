@@ -25,7 +25,7 @@ let
       ptr-poker = hself.callCabal2nix "ptr-poker" inputs.ptr-poker { };
 
       ghc-exactprint =
-        hself.callCabal2nix "ghc-exactprint" inputs.ghc-exactprint-150 { };
+        hself.callCabal2nix "ghc-exactprint" inputs.ghc-exactprint-160 { };
       # Hlint is still broken
       hlint = doJailbreak (hself.callCabal2nix "hlint" inputs.hlint { });
 
@@ -41,8 +41,8 @@ let
       integer-logarithms = hsuper.callHackage "integer-logarithms" "1.0.3.1" {};
       hiedb = hsuper.callHackage "hiedb" "0.4.2.0" {};
       hie-bios = hsuper.callHackage "hie-bios" "0.11.0" {};
-      lsp = hsuper.callCabal2nix "lsp" "${inputs.lsp}/lsp" {};
-      lsp-types = hsuper.callCabal2nix "lsp-types" "${inputs.lsp}/lsp-types" {};
+      lsp = hsuper.callCabal2nix "lsp" inputs.lsp {};
+      lsp-types = hsuper.callCabal2nix "lsp-types" inputs.lsp-types {};
 
       # Re-generate HLS drv excluding some plugins
       haskell-language-server =
