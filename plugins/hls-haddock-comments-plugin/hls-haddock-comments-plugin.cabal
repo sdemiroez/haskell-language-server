@@ -27,6 +27,7 @@ library
     hs-source-dirs:     src-92
     other-modules:
       Ide.Plugin.HaddockComments.Data
+      Ide.Plugin.HaddockComments.Prelude
   else
     hs-source-dirs:     src
     other-modules:
@@ -50,6 +51,7 @@ library
     , transformers
     , mtl
     , lens
+    , syb
 
   default-language:   Haskell2010
   default-extensions:

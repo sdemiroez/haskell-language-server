@@ -114,10 +114,10 @@ instance Pretty Log where
 
 instance Show (Annotated ParsedSource) where
   show _ = "<Annotated ParsedSource>"
- 
+
 instance NFData (Annotated ParsedSource) where
   rnf = rwhnf
- 
+
 data GetAnnotatedParsedSource = GetAnnotatedParsedSource
   deriving (Eq, Show, Typeable, GHC.Generic)
 
