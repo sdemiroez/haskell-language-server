@@ -88,7 +88,7 @@ codeAction recorder state plId (CodeActionParams _ _ docId _ context) = pluginRe
         uri = docId ^. J.uri
         List diags = context ^. J.diagnostics
 
-        ghcDiags = filter (\d -> d ^. J.source == Just "typecheck") diags
+        ghcDiags = filter (\d -> maybe False ("typecheck" `T.isSuffixOf`) (d^.J.source)) diags
         methodDiags = filter (\d -> isClassMethodWarning (d ^. J.message)) ghcDiags
 
         mkActions
